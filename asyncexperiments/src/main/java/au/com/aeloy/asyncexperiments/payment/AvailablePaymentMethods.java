@@ -13,14 +13,16 @@ import static java.util.Collections.emptyList;
 import static java.util.Locale.forLanguageTag;
 
 @Repository
-public class AvailablePaymentMethods {
+class AvailablePaymentMethods {
+
     private static final Map<Locale, List<PaymentMethod>> paymentMethodByLocale = ImmutableMap.of(
             Locale.ENGLISH, asList(CREDIT_CARD),
             forLanguageTag("en-AU"), asList(CREDIT_CARD, BPAY),
             forLanguageTag("pt-BR"), asList(CREDIT_CARD, BOLETO)
     );
 
-    public List<PaymentMethod> paymentMethodFor(Locale locale) {
+    List<PaymentMethod> paymentMethodFor(Locale locale) {
         return paymentMethodByLocale.getOrDefault(locale, emptyList());
     }
+
 }
