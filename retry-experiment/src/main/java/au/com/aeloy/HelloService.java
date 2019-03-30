@@ -2,6 +2,7 @@ package au.com.aeloy;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.retry.RetryException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -9,7 +10,7 @@ import java.net.URI;
 /**
  * Simple service to abstract the call to the node web server running locally.
  */
-public class HelloService {
+class HelloService {
 
     /**
      * This simple method, just tries to send a request to a simple node
@@ -17,7 +18,7 @@ public class HelloService {
      *
      * @return return the services response.
      */
-    public String request() {
+    String request() {
         SimpleClientHttpRequestFactory clientHttpRequestFactory = new SimpleClientHttpRequestFactory();
         clientHttpRequestFactory.setConnectTimeout(2000);
         RestTemplate rest = new RestTemplate(clientHttpRequestFactory);
@@ -28,13 +29,13 @@ public class HelloService {
             System.out.println(result.getStatusCode().toString());
 
             if (!result.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException("error trying to connect");
+                throw new RetryException("error trying to connect");
             }
 
             return result.getBody();
         } catch (Exception e) {
             System.out.println("not possible to connect");
-            throw new RuntimeException("error trying to connect");
+            throw new RetryException("error trying to connect");
         }
 
     }
