@@ -4,6 +4,8 @@ This simple project, is a simulation of an application that allows for voting.
 It provides an endpoint to send votes to some sort of subject in order to be asynchronously processed.
 Each vote is sent to a standard SQS Queue backed by a simple consumer written from scratch using only AWS SDK and Executor framework from Java concurrency API.
 
+Simply put it is a producer/consumer example using Amazon SQS
+
 ## Tecnhologies
 
 * AWS SQS
@@ -14,4 +16,3 @@ Each vote is sent to a standard SQS Queue backed by a simple consumer written fr
 
 This is a simple application used as my lab to practice the usage of some simple technologies as part of a code kata.
 Most examples are contrived examples and should not be something to be used in production.
- 

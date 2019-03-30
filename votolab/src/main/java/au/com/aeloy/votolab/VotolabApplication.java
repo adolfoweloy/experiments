@@ -1,47 +1,39 @@
 package au.com.aeloy.votolab;
 
 import au.com.aeloy.votolab.vote.consumer.VoteConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
 
 @SpringBootApplication
 public class VotolabApplication {
-	private ApplicationContext context;
+	private static final Logger logger = LoggerFactory.getLogger(VotolabApplication.class);
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext applicationContext = SpringApplication
 				.run(VotolabApplication.class, args);
 
-		VotolabApplication me = new VotolabApplication(applicationContext);
-		me.startPolling();
+		// starts the polling method
+		new VotolabApplication().startPolling(applicationContext);
 	}
 
-	VotolabApplication(ApplicationContext applicationContext) {
-		this.context = applicationContext;
-	}
 
-	private void startPolling() {
-		ExecutorService executorService = Executors.newFixedThreadPool(5);
+	private void startPolling(ApplicationContext context) {
+		VoteConsumer consumer = context.getBean(VoteConsumer.class);
 
-		while (true) {
-			try {
-				System.out.println("polling...");
-				Thread.sleep(1000);
+		// pooling for SQS messages every 7 seconds
+		while (true) try {
+			Thread.sleep(7000);
 
-				VoteConsumer consumer = context.getBean(VoteConsumer.class);
-
-				// start polling
-				System.out.println("receiving message");
-				executorService.submit(consumer::receiveMessage);
-
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			logger.info("Receiving messages / processing...");
+			consumer.receiveMessage();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
 		}
 	}
 

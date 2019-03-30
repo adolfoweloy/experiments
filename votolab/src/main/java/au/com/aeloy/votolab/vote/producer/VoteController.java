@@ -8,7 +8,6 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class VoteController {
 
     private final AmazonSQS amazonSQS;
-
-    @Qualifier("custom-object-mapper")
     private final ObjectMapper objectMapper;
 
     public VoteController(AmazonSQS amazonSQS, ObjectMapper objectMapper) {
@@ -32,7 +29,7 @@ public class VoteController {
     @PostMapping("/")
     public ResponseEntity<?> send(@RequestBody Vote vote) throws JsonProcessingException {
         GetQueueUrlRequest getQueueUrlRequest = new GetQueueUrlRequest();
-        getQueueUrlRequest.setQueueName("payments");
+        getQueueUrlRequest.setQueueName("vote");
         GetQueueUrlResult queueUrl = amazonSQS.getQueueUrl(getQueueUrlRequest);
 
         SendMessageRequest sendMessageRequest = new SendMessageRequest();
