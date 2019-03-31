@@ -1,18 +1,16 @@
 package au.com.aeloy.votolab.vote.backdoor;
 
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.GetQueueUrlRequest;
-import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
-import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Optional;
 
 /**
  * Extremely contrived example, I know.
@@ -24,45 +22,56 @@ public class OnDemandConsumer {
     private static final Logger logger = LoggerFactory.getLogger(OnDemandConsumer.class);
 
     private final AmazonSQS amazonSQS;
+    private final MessageReceiver messageReceiver;
+    private final String queueName;
 
-    public OnDemandConsumer(AmazonSQS amazonSQS) {
+    public OnDemandConsumer(
+            AmazonSQS amazonSQS,
+            MessageReceiver messageReceiver,
+            String queueName
+    ) {
         this.amazonSQS = amazonSQS;
+        this.messageReceiver = messageReceiver;
+        this.queueName = queueName;
     }
 
     @PostMapping("/consume")
-    public ResponseEntity<Void> consume() {
-
-        // get queue url request action
-        GetQueueUrlRequest getQueueUrlRequest = new GetQueueUrlRequest();
-        getQueueUrlRequest.setQueueName("vote");
-        String queueUrl =amazonSQS
-                .getQueueUrl(getQueueUrlRequest)
-                .getQueueUrl();
+    public ResponseEntity<Void> consume(
+            @RequestParam("long-polling") String longPolling) {
 
         // preparing receive message request action
-        ReceiveMessageRequest request = new ReceiveMessageRequest();
-        request.setQueueUrl(queueUrl);
-        request.setMaxNumberOfMessages(10);
+        ReceiveMessageRequest request = getReceiveMessageRequest(
+                Optional.ofNullable(longPolling).orElse("false"));
 
         // running receive message action
-        ReceiveMessageResult result = amazonSQS.receiveMessage(request);
+        messageReceiver
+                .receiveMessages(request)
+                .thenAcceptAsync((messages) -> {
+                    logger.info("received {} message(s)", messages.size());
+                    messages.stream().forEach(m -> {
+                        logger.info("message: {}", m.getBody());
+                        logger.info("handler: {}", m.getMessageId());
 
-        // handling the result(s)
-        // Amazon SQS stores messages on multiple nodes. When sending the receiveMessage action,
-        // SQS samples a random number of nodes to collect messages, so it might not retrieve all
-        // messages if you have less than 1000 messages in your queue.
-        List<Message> messages = result.getMessages();
-        messages.stream().forEach(m -> {
-            logger.info("message: {}", m.getBody());
-            logger.info("handler: {}", m.getReceiptHandle());
-        });
-
-        // deleting message
-        // by not deleting possible other messages retrieved, they will remain in flight
-        // until their visibility timeout expires.
-        amazonSQS.deleteMessage(queueUrl, messages.get(0).getReceiptHandle());
-        logger.info("messages deleted");
+                        // deleting the message
+                        amazonSQS.deleteMessage(queueName, m.getReceiptHandle());
+                        logger.info("message {} deleted", m.getMessageId());
+                    });
+                });
 
         return ResponseEntity.ok().build();
     }
+
+    private ReceiveMessageRequest getReceiveMessageRequest(String longPolling) {
+        ReceiveMessageRequest request = new ReceiveMessageRequest();
+
+        if (!"false".equals(longPolling)) {
+            logger.info("using {} seconds for long polling", 15);
+            request.setWaitTimeSeconds(15);
+        }
+
+        request.setQueueUrl(queueName);
+        request.setMaxNumberOfMessages(4);
+        return request;
+    }
+
 }

@@ -7,9 +7,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.concurrent.ExecutionException;
 
+@EnableAsync
 @SpringBootApplication
 public class VotolabApplication {
 	private static final Logger logger = LoggerFactory.getLogger(VotolabApplication.class);
@@ -19,7 +21,7 @@ public class VotolabApplication {
 				.run(VotolabApplication.class, args);
 
 		// starts the polling method
-		new VotolabApplication().startPolling(applicationContext);
+		// new VotolabApplication().startPolling(applicationContext);
 	}
 
 
