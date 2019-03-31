@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/vote")
-public class VoteController {
+public class VoteProducer {
 
     private final AmazonSQS amazonSQS;
     private final ObjectMapper objectMapper;
 
-    public VoteController(AmazonSQS amazonSQS, ObjectMapper objectMapper) {
+    public VoteProducer(AmazonSQS amazonSQS, ObjectMapper objectMapper) {
         this.amazonSQS = amazonSQS;
         this.objectMapper = objectMapper;
     }

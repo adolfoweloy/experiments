@@ -71,13 +71,15 @@ public class VoteConsumer {
      */
     private Future<Result> processMessageFunction(Message message) {
         String receiptHandle = message.getReceiptHandle();
+        String messageId = message.getMessageId();
+
         return executorService.submit(
                 () -> {
                     Result result = voteProcessor.processMessage(
-                            receiptHandle,
+                            messageId,
                             message.getBody());
 
-                    logger.info("Deleting message {}.", receiptHandle);
+                    logger.info("Deleting message {}.", messageId);
                     amazonSQS.deleteMessage(queueName, receiptHandle);
 
                     return result;

@@ -39,3 +39,18 @@ inside an ascynchronous void method and make sure that you can handle this excep
 
 - Create an endpoint that allows to send a payment to be asynchronously processed so that the result
 is sent as a callback to a fictitious endpoint (use request bin to see the results).
+
+### votolab
+
+This simple project, is a simulation of an application that allows for voting.
+It provides an endpoint to send votes to some sort of subject in order to be asynchronously processed.
+Each vote is sent to a standard SQS Queue backed by a simple consumer written from scratch using only AWS SDK and Executor framework from Java concurrency API.
+
+Simply put it is a producer/consumer example using Amazon SQS
+
+**Tecnhologies**
+
+* AWS SQS
+* Framework executor of Java concurrency API
+* Jackson + Immutable (exercises on how to use both together)
+
