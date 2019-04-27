@@ -1,0 +1,26 @@
+version: '3'
+services:
+    microexp:
+        build: ./micrometer-experiment/. 
+        container_name: microexp
+        ports:
+            - 8080:8080
+            - 9010:9010
+
+    jmxcollector:
+        build: ./jmxcollector/.
+        container_name: jmxcollector
+        depends_on:
+            - microexp
+            - graphite
+
+    graphite:
+        container_name: graphite
+        image: "graphiteapp/graphite-statsd"
+        ports:
+            - 80:80
+            - 2003-2004:2003-2004
+            - 2023-2024:2023-2024
+            - 8125:8125/udp
+            - 8126:8126
+

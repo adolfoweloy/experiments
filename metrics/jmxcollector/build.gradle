@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group 'au.com.aeloy'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Implementation-Version': version,
+                'Main-Class': 'au.com.aeloy.Main'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.timgroup:java-statsd-client:3.0.1'
+    compile 'com.evanlennick:retry4j:0.2.0'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
