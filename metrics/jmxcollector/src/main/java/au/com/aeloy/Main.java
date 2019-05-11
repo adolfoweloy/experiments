@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     private static final ServerAddress statsdServer = new ServerAddress("graphite", 8125);
-    private static final ServerAddress jmxServer = new ServerAddress("microexp", 9010);
+    private static final ServerAddress jmxServer = new ServerAddress("172.28.1.1", 9010);
 
     public static void main(String[] args) throws Exception {
 
