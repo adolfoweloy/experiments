@@ -1,0 +1,4 @@
+server.tomcat:
+  max-threads: 10
+  accept-count: 10
+  max-connections: 200
